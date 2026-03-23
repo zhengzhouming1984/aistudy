@@ -37,8 +37,7 @@ class FileChatMessageHistory(BaseChatMessageHistory):
         with open(self.file_path, "w", encoding="utf-8") as f:
             json.dump(dict_messages, f, ensure_ascii=False, indent=2)
             print(f"保存 {len(self.messages)} 条消息")
-
-    def load_messages(self) -> None: 
+    def load_messages(self) -> None:
         """
         从文件加载消息历史
         
