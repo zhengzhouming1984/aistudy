@@ -1,0 +1,6 @@
+# 项目依赖
+streamlit
+langchain
+langchain-chroma
+langchain-openai
+langchain-text-splitters
