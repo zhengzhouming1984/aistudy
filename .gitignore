@@ -17,3 +17,6 @@ Thumbs.db
 
 # Chat history
 chat_history/
+
+# Vector database
+chroma_db/

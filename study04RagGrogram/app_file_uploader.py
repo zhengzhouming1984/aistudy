@@ -12,7 +12,7 @@
 
 使用方法：
 1. 运行命令：streamlit run app_file_uploader.py
-2. 在浏览器中访问生成的本地 URL
+2. 在浏览器中访问生成的本地 URL 
 3. 点击 "浏览文件" 按钮上传 TXT 文件
 4. 查看文件信息和内容
 """
@@ -20,6 +20,7 @@
 import streamlit as st  # 导入 Streamlit 库，用于构建 Web 应用
 from knowledge_base import KnowledgeBaseService
 import os
+import time  # 导入 time 模块，用于添加延时
 
 # 设置网页标题
 st.title("知识库更新服务")
@@ -101,9 +102,10 @@ if uploader_file is not None:
             # 1. getvalue() 方法获取文件的字节数据
             # 2. decode("utf-8") 将字节数据转换为 UTF-8 编码的字符串
             text = uploader_file.getvalue().decode("utf-8")
-            
-            result = st.session_state["service"].upload_by_str(text,file_name)
-            st.write(result)
+            with st.spinner("上传中..."):
+                time.sleep(3)
+                result = st.session_state["service"].upload_by_str(text,file_name)
+                st.write(result)
             print(f"上传结果: {result}")  # 在控制台输出结果
     except Exception as e:
         st.error(f"文件处理失败: {str(e)}")
