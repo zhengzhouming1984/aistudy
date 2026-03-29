@@ -149,7 +149,7 @@ class KnowledgeBaseService(object):
         spliter: 文本分割器实例（语义或递归字符）
     """
     
-    def __init__(self):
+    def __init__(self, auto_load_data: bool = True):
         """
         初始化知识库服务
         
@@ -157,6 +157,10 @@ class KnowledgeBaseService(object):
         1. 确保Chroma存储目录存在
         2. 初始化Chroma向量数据库
         3. 根据配置选择文本分割器
+        4. 自动加载data文件夹中的文件（可选）
+        
+        Args:
+            auto_load_data (bool): 是否自动加载data文件夹中的文件，默认为True
         """
         # 确保Chroma存储目录存在
         os.makedirs(config.chroma_path, exist_ok=True)
@@ -184,6 +188,18 @@ class KnowledgeBaseService(object):
                 keep_separator=True
             )
             print("使用递归字符切片器")
+        
+        # 自动加载data文件夹中的文件
+        if auto_load_data:
+            print("-" * 50)
+            print("自动加载data文件夹中的文件...")
+            result = self.upload_data_folder()
+            print("-" * 50)
+            print(f"自动加载完成：")
+            print(f"成功: {len(result['success'])} 个文件")
+            print(f"跳过: {len(result['skipped'])} 个文件")
+            print(f"失败: {len(result['failed'])} 个文件")
+            print("-" * 50)
 
     def upload_by_str(self, data: str, filename: str) -> str:
         """
