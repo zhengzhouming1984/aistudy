@@ -105,7 +105,7 @@ semantic_chunking = True
 # 语义相似度阈值
 # 值越小切片越细，值越大切片越粗
 # 范围：0-1，建议根据文本特点调整
-semantic_threshold = 0.1
+semantic_threshold = 0.5
 
 # 语义切片的目标大小（字符数）
 # 语义切片器会尽量保持每个切片接近此大小

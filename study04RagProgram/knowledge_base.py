@@ -175,7 +175,12 @@ class KnowledgeBaseService(object):
         # 根据配置选择文本分割器
         if config.semantic_chunking:
             # 使用语义切片：基于语义相似度进行切分
-            self.spliter = SemanticChunker(qwen_embeddings)
+            self.spliter = SemanticChunker(
+                qwen_embeddings, 
+                breakpoint_threshold_amount=config.semantic_threshold,
+                min_chunk_size=config.semantic_chunk_overlap
+            )
+
             print("-" * 50)
             print("使用语义切片器")
         else:
@@ -296,21 +301,21 @@ class KnowledgeBaseService(object):
     def query_knowledge_base(self, query: str, k: int = 5) -> list:
         """
         查询知识库
-        
+
         查询逻辑：
         1. 获取所有文档
         2. 根据查询关键词判断相关性
         3. 优先返回相关文档（前2个）
-        
+
         关键词匹配：
         - 尺码/身高/体重 → 优先返回尺码推荐文档
         - 洗涤/养护/清洗 → 优先返回洗涤养护文档
         - 颜色/搭配 → 优先返回颜色选择文档
-        
+
         Args:
             query (str): 查询字符串
             k (int): 返回结果数量，默认为5（实际返回前2个）
-            
+
         Returns:
             list: 相关文档列表
         """
@@ -318,7 +323,7 @@ class KnowledgeBaseService(object):
             # 获取所有文档
             all_docs = self.chroma.get()
             all_documents = []
-            
+
             # 构建文档对象列表
             if all_docs and 'ids' in all_docs and 'documents' in all_docs and 'metadatas' in all_docs:
                 for i, doc_id in enumerate(all_docs['ids']):
@@ -328,20 +333,20 @@ class KnowledgeBaseService(object):
                         'id': doc_id
                     })()
                     all_documents.append(doc)
-            
+
             # 检查查询关键词
             has_size_keywords = any(kw in query for kw in ["尺码", "身高", "体重"])
             has_wash_keywords = any(kw in query for kw in ["洗涤", "养护", "清洗", "羊绒衫"])
             has_color_keywords = any(kw in query for kw in ["颜色", "搭配"])
-            
+
             # 根据关键词优先级排序
             relevant_docs = []
             other_docs = []
-            
+
             for doc in all_documents:
                 source = doc.metadata.get("source", "")
                 content = doc.page_content
-                
+
                 # 根据关键词匹配判断相关性
                 if has_size_keywords and ("尺码推荐" in source or "尺码" in content or "身高" in content or "体重" in content):
                     relevant_docs.append(doc)
@@ -351,10 +356,10 @@ class KnowledgeBaseService(object):
                     relevant_docs.append(doc)
                 else:
                     other_docs.append(doc)
-            
+
             # 合并结果，优先显示相关文档
             final_docs = relevant_docs + other_docs
-            
+
             # 返回前2个结果
             return final_docs[:2]
         except Exception as e:

@@ -4,3 +4,4 @@ langchain
 langchain-chroma
 langchain-openai
 langchain-text-splitters
+langchain-experimental
