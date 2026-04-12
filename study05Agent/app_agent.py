@@ -29,10 +29,12 @@ st.set_page_config(
 )
 
 # 生成或获取会话ID
+# 会话ID格式：agent_时间戳_随机数，确保唯一性
 if "session_id" not in st.session_state:
     st.session_state.session_id = f"agent_{int(time.time())}_{random.randint(1000, 9999)}"
 
 # 初始化会话状态
+# 确保每个会话都有一个独立的AgentService实例
 if "agent_service" not in st.session_state:
     st.session_state.agent_service = AgentService(st.session_state.session_id)
 # 如果session_id改变，重新创建AgentService实例

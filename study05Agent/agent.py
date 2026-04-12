@@ -158,10 +158,11 @@ class AgentService:
             str: 处理结果
         """
         try:
-            # 构建提示
+            # 构建提示消息列表
             messages = []
             
             # 添加系统提示
+            # 系统提示定义了助手的角色和可用工具
             system_prompt = """你是一个智能助手，能够帮助用户回答问题。你可以使用以下工具：
 
 1. RAG查询工具：用于查询知识库，获取相关信息
@@ -178,6 +179,7 @@ class AgentService:
             messages.append({"role": "system", "content": system_prompt})
             
             # 添加历史对话
+            # 将历史对话转换为模型可理解的格式
             for msg in self.chat_history:
                 if isinstance(msg, HumanMessage):
                     messages.append({"role": "user", "content": msg.content})
@@ -187,45 +189,47 @@ class AgentService:
             # 添加当前查询
             messages.append({"role": "user", "content": query})
             
-            # 调用模型
+            # 调用大语言模型
             response = self.llm.invoke(messages)
             
             # 处理模型响应
             response_content = response.content
             
-            # 检查是否需要使用工具
+            # 检查是否需要使用RAG工具
             if "RAG查询：" in response_content:
                 # 提取查询内容
                 rag_query = response_content.split("RAG查询：")[1].strip()
-                # 调用RAG工具
+                # 调用RAG工具获取知识库信息
                 rag_result = self.rag_query_tool(rag_query)
-                # 将工具结果添加到对话
+                # 将工具结果添加到对话历史
                 self.chat_history.append(HumanMessage(content=query))
                 self.chat_history.append(AIMessage(content=f"使用RAG查询工具：{rag_query}\n结果：{rag_result}"))
-                # 保存聊天历史到Redis
+                # 保存聊天历史到数据库
                 self._save_chat_history()
                 return f"使用RAG查询工具：{rag_query}\n结果：{rag_result}"
             
+            # 检查是否需要使用MCP工具
             elif "MCP调用：" in response_content:
                 # 提取动作和参数
                 mcp_part = response_content.split("MCP调用：")[1].strip()
                 if "|" in mcp_part:
                     action, params = mcp_part.split("|", 1)
-                    # 调用MCP工具
+                    # 调用MCP工具执行相应动作
                     mcp_result = self.mcp_tool(action.strip(), params.strip())
-                    # 将工具结果添加到对话
+                    # 将工具结果添加到对话历史
                     self.chat_history.append(HumanMessage(content=query))
                     self.chat_history.append(AIMessage(content=f"使用MCP工具：{action.strip()}\n参数：{params.strip()}\n结果：{mcp_result}"))
-                    # 保存聊天历史到Redis
+                    # 保存聊天历史到数据库
                     self._save_chat_history()
                     return f"使用MCP工具：{action.strip()}\n参数：{params.strip()}\n结果：{mcp_result}"
             
             # 如果没有使用工具，直接返回回答
             self.chat_history.append(HumanMessage(content=query))
             self.chat_history.append(AIMessage(content=response_content))
-            # 保存聊天历史到Redis
+            # 保存聊天历史到数据库
             self._save_chat_history()
             return response_content
             
         except Exception as e:
+            # 捕获并返回错误信息
             return f"处理错误: {str(e)}"

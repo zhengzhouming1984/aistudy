@@ -17,23 +17,41 @@ SQLITE_DB_PATH = "agent_chat.db"
 CHROMA_PERSIST_PATH = "./chroma_db" 
 chroma_client = chromadb.PersistentClient(path=CHROMA_PERSIST_PATH) 
 
-# 1.3 向量嵌入模型（本地轻量模型，无需GPU） 
+# 1.3 向量嵌入模型（本地轻量模型，无需GPU）
+# 优先使用本地缓存的模型，避免每次从网络下载
 try:
-    embedding_func = embedding_functions.SentenceTransformerEmbeddingFunction( 
-        model_name=os.getenv("VECTOR_EMBEDDING_MODEL", "all-MiniLM-L6-v2") 
-    ) 
+    # 使用本地缓存的模型路径
+    import os
+    model_path = os.path.expanduser("~/.cache/chroma/onnx_models/all-MiniLM-L6-v2")
+    if os.path.exists(model_path):
+        print(f"使用本地缓存的模型: {model_path}")
+        # 使用本地模型创建嵌入函数
+        embedding_func = embedding_functions.SentenceTransformerEmbeddingFunction( 
+            model_name=model_path 
+        )
+    else:
+        print("本地模型不存在，尝试从网络下载")
+        # 从环境变量获取模型名称，默认使用 all-MiniLM-L6-v2
+        embedding_func = embedding_functions.SentenceTransformerEmbeddingFunction( 
+            model_name=os.getenv("VECTOR_EMBEDDING_MODEL", "all-MiniLM-L6-v2") 
+        )
 except Exception as e:
     print(f"加载嵌入模型失败: {str(e)}")
-    # 使用默认嵌入函数作为备用
+    # 嵌入模型加载失败时，使用 None 作为备用
     embedding_func = None
 
-# 1.4 获取/创建向量集合（一个会话一个collection，或统一用一个） 
+# 1.4 获取/创建向量集合（一个会话一个collection，或统一用一个）
 try:
-    collection = chroma_client.get_or_create_collection( 
-        name="chat_vectors", 
-        embedding_function=embedding_func, 
-        metadata={"description": "Agent 聊天记录向量库"} 
-    )
+    if embedding_func:
+        collection = chroma_client.get_or_create_collection( 
+            name="chat_vectors", 
+            embedding_function=embedding_func, 
+            metadata={"description": "Agent 聊天记录向量库"} 
+        )
+        print("向量集合创建成功")
+    else:
+        print("嵌入模型未初始化，跳过向量集合创建")
+        collection = None
 except Exception as e:
     print(f"创建向量集合失败: {str(e)}")
     collection = None 
