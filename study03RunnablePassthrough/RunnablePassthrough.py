@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from langchain_core.vectorstores import InMemoryVectorStore
 from openai import OpenAI
 from langchain_core.prompts import ChatPromptTemplate
@@ -5,10 +7,13 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables import RunnablePassthrough
 
+# 加载环境变量
+load_dotenv()
+
 # 初始化 OpenAI 客户端，配置 API 密钥和基础 URL
 # 使用 SiliconFlow API 作为后端
-api_key = "sk-fwitbnnwrrapdhijtyprotmhldjakiryyassgadysfombilw"
-base_url = "https://api.siliconflow.cn/v1"
+api_key = os.getenv("OPENAI_API_KEY", "sk-fwitbnnwrrapdhijtyprotmhldjakiryyassgadysfombilw")
+base_url = os.getenv("OPENAI_BASE_URL", "https://api.siliconflow.cn/v1")
 
 client = OpenAI(
     api_key=api_key,  # API 密钥
@@ -19,7 +24,7 @@ client = OpenAI(
 model = ChatOpenAI(
     api_key=api_key,
     base_url=base_url,
-    model_name="Qwen/Qwen3-8B"
+    model_name=os.getenv("CHAT_MODEL", "Qwen/Qwen3-8B")
 )
 
 # 初始化嵌入模型
@@ -27,7 +32,7 @@ from langchain_openai import OpenAIEmbeddings
 qwen_embeddings = OpenAIEmbeddings(
     api_key=api_key,
     base_url=base_url,
-    model="Qwen/Qwen3-Embedding-0.6B"
+    model=os.getenv("EMBEDDING_MODEL", "Qwen/Qwen3-Embedding-0.6B")
 )
 
 # 创建提示模板

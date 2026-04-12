@@ -1,0 +1,5 @@
+streamlit==1.56.0
+langchain==1.2.15
+langchain-openai==1.1.12
+langchain-experimental==0.4.1
+python-dotenv==1.2.2

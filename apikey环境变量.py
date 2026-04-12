@@ -9,19 +9,24 @@
 - 流式处理响应，实时输出模型生成的内容
 """
 
+import os
+from dotenv import load_dotenv
 from openai import OpenAI
+
+# 加载环境变量
+load_dotenv()
 
 # 初始化 OpenAI 客户端，配置 API 密钥和基础 URL
 # 使用 SiliconFlow API 作为后端
 client = OpenAI(
-    api_key="sk-fwitbnnwrrapdhijtyprotmhldjakiryyassgadysfombilw",  # API 密钥
-    base_url="https://api.siliconflow.cn/v1"  # SiliconFlow API 基础 URL
+    api_key=os.getenv("OPENAI_API_KEY", "sk-fwitbnnwrrapdhijtyprotmhldjakiryyassgadysfombilw"),  # API 密钥
+    base_url=os.getenv("OPENAI_BASE_URL", "https://api.siliconflow.cn/v1")  # SiliconFlow API 基础 URL
 )
 
 # 发送聊天完成请求
 response = client.chat.completions.create(
     # model='Pro/deepseek-ai/DeepSeek-R1',  # 备选模型
-    model="Qwen/Qwen3-8B",  # 使用 Qwen3-8B 模型
+    model=os.getenv("CHAT_MODEL", "Qwen/Qwen3-8B"),  # 使用配置的模型
     # model="deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",  # 使用 Qwen3-8B 模型
     messages=[
         {'role': 'user','content': "你的大模型是什么版本？"},  # 用户问题

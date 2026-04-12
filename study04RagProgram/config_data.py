@@ -32,7 +32,7 @@ openai_base_url = os.getenv("OPENAI_BASE_URL", "https://api.siliconflow.cn/v1")
 
 # 嵌入模型名称
 # 使用Qwen的嵌入模型，用于文本向量化和语义切片
-embedding_model = "Qwen/Qwen3-Embedding-0.6B"
+embedding_model = os.getenv("EMBEDDING_MODEL", "Qwen/Qwen3-Embedding-0.6B")
 
 
 # ==================== MD5去重配置 ====================

@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from openai import OpenAI
 from langchain_core.prompts import PromptTemplate, ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
@@ -5,18 +7,21 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.chat_history import InMemoryChatMessageHistory
 from langchain_openai import ChatOpenAI
 
+# 加载环境变量
+load_dotenv()
+
 # 初始化 OpenAI 客户端，配置 API 密钥和基础 URL
 # 使用 SiliconFlow API 作为后端
 client = OpenAI(
-    api_key="sk-fwitbnnwrrapdhijtyprotmhldjakiryyassgadysfombilw",  # API 密钥
-    base_url="https://api.siliconflow.cn/v1"  # SiliconFlow API 基础 URL
+    api_key=os.getenv("OPENAI_API_KEY", "sk-fwitbnnwrrapdhijtyprotmhldjakiryyassgadysfombilw"),  # API 密钥
+    base_url=os.getenv("OPENAI_BASE_URL", "https://api.siliconflow.cn/v1")  # SiliconFlow API 基础 URL
 )
 
 # 初始化 LangChain 的 ChatOpenAI 模型
 model = ChatOpenAI(
-    api_key="sk-fwitbnnwrrapdhijtyprotmhldjakiryyassgadysfombilw",
-    base_url="https://api.siliconflow.cn/v1",
-    model_name="Qwen/Qwen3-8B"
+    api_key=os.getenv("OPENAI_API_KEY", "sk-fwitbnnwrrapdhijtyprotmhldjakiryyassgadysfombilw"),
+    base_url=os.getenv("OPENAI_BASE_URL", "https://api.siliconflow.cn/v1"),
+    model_name=os.getenv("CHAT_MODEL", "Qwen/Qwen3-8B")
 )
 
 # 创建提示模板

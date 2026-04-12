@@ -37,6 +37,7 @@ from langchain_core.output_parsers import StrOutputParser
 
 # 导入配置文件，包含API密钥等配置
 import config_data as config
+import os
 
 # 导入会话历史管理函数，用于获取/创建对话历史
 from file_history_store import get_session_history
@@ -129,7 +130,7 @@ class RagService:
         self.chat_model = ChatOpenAI(
             api_key=config.openai_api_key,      # API密钥
             base_url=config.openai_base_url,    # API基础URL
-            model_name="Qwen/Qwen3-8B"          # 使用的模型名称
+            model_name=os.getenv("CHAT_MODEL", "Qwen/Qwen3-8B")          # 使用的模型名称
         )
         
         # 构建并保存处理链
